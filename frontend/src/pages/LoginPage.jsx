@@ -1,6 +1,8 @@
+import API_URL from '../config'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
+import API_URL from '../config'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 
@@ -16,7 +18,7 @@ export default function LoginPage({ onSwitch }) {
     }
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form)
+      const res = await axios.post(`${API_URL}/api/auth/login`, form)
       login(res.data.user, res.data.token)
       toast.success(`Welcome back, ${res.data.user.name}! 👋`)
     } catch (err) {
