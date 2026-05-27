@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useDropzone } from 'react-dropzone'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import API_URL from '../config'
 
 export default function UploadModal({ onClose, setDocuments }) {
   const [uploading, setUploading] = useState(false)
@@ -19,11 +20,11 @@ export default function UploadModal({ onClose, setDocuments }) {
       const formData = new FormData()
       formData.append('pdf', file)
 
-      const uploadRes = await axios.post('http://localhost:5000/api/upload', formData)
+      const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
       const { documentId, totalChunks } = uploadRes.data
       setProgress(`🧠 Generating AI embeddings for ${totalChunks} chunks...`)
 
-      await axios.post(`http://localhost:5000/api/embed/${documentId}`)
+      await axios.post(`${API_URL}/api/embed/${documentId}`)
 
       setDocuments(prev => [...prev, { originalName: file.name, totalChunks }])
 
