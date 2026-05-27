@@ -31,8 +31,8 @@ exports.chat = async (req, res) => {
           index: 'vector_index',
           path: 'chunks.embedding',
           queryVector: queryEmbedding,
-          numCandidates: 5,
-          limit: 1,
+          numCandidates: 100,
+          limit: 5,
         },
       },
       {
@@ -61,8 +61,8 @@ exports.chat = async (req, res) => {
     );
 
     const contextText = contextChunks
-  .map((c, i) => `[Source ${i + 1}: ${c.source}]\n${c.text.slice(0, 1500)}`)
-  .join('\n\n---\n\n');
+      .map((c, i) => `[Source ${i + 1}: ${c.source}]\n${c.text.slice(0, 1500)}`)
+      .join('\n\n---\n\n');
 
     // Step 4: Send to Groq AI
     const completion = await groq.chat.completions.create({
