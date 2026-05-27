@@ -5,7 +5,6 @@ const Document = require('../models/Document');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Convert question to vector (still using Gemini for embeddings)
 const getEmbedding = async (text) => {
   const response = await ai.models.embedContent({
     model: 'gemini-embedding-001',
@@ -21,10 +20,9 @@ exports.chat = async (req, res) => {
 
     console.log(`💬 Question: "${question}"`);
 
-    // Step 1: Convert question to vector
     const queryEmbedding = await getEmbedding(question);
+    console.log(`✅ Question embedded, dimensions: ${queryEmbedding.length}`);
 
-    // Step 2: Search MongoDB for relevant chunks
     const results = await Document.aggregate([
       {
         $vectorSearch: {
@@ -44,7 +42,8 @@ exports.chat = async (req, res) => {
       },
     ]);
 
-    // Step 3: Build context
+    console.log(`🔍 Vector search returned: ${results.length} results`);
+
     if (results.length === 0) {
       return res.json({
         answer: "I don't have enough information to answer this question.",
@@ -64,7 +63,6 @@ exports.chat = async (req, res) => {
       .map((c, i) => `[Source ${i + 1}: ${c.source}]\n${c.text.slice(0, 1500)}`)
       .join('\n\n---\n\n');
 
-    // Step 4: Send to Groq AI
     const completion = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages: [
@@ -92,7 +90,7 @@ Always cite your source like: "According to [filename]..."`,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error('❌ Chat error:', err);
     res.status(500).json({ error: err.message });
   }
 };
